@@ -1,0 +1,47 @@
+
+services:
+  postgresql:
+    image: postgres
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      Host: ${POSTGRES_HOST}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    networks:
+      - bookshelf-network 
+    volumes:
+      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+   
+
+  bookshelf-api:
+    image: mcr.microsoft.com/azure-databases/data-api-builder:latest
+    container_name: DAB-Bookshelf
+    volumes:
+      - "./DABConfig:/App/configs"
+    ports:
+      - "5001:5000"
+    env_file:
+      - "./DABConfig/.env"
+    networks:
+      - bookshelf-network
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    command: ["--ConfigFileName", "/App/configs/dab-config.json"]
+    restart: unless-stopped
+
+networks:
+  bookshelf-network:
+    driver: bridge
+
+# https://stackoverflow.com/questions/31249112/allow-docker-container-to-connect-to-a-local-host-postgres-database    
