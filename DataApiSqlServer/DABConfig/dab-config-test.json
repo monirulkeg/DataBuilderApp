@@ -1,0 +1,207 @@
+{
+  "$schema": "https://github.com/Azure/data-api-builder/releases/download/v0.9.7/dab.draft.schema.json",
+  "data-source": {
+    "database-type": "mssql",
+    "connection-string": "@env('CONN_STRING')"
+  },
+  "runtime": {
+    "rest": {
+      "enabled": true,
+      "path": "/api",
+      "request-body-strict": true
+    },
+    "graphql": {
+      "enabled": true,
+      "path": "/graphql",
+      "allow-introspection": true
+    },
+    "host": {
+      "cors": null,
+      "authentication": {
+        "provider": "Simulator"
+      },
+      "mode": "development"
+    }
+  },
+  "entities": {
+    "Author": {
+      "source": {
+        "object": "dbo.authors",
+        "type": "table",
+        "key-fields": []
+      },
+      "graphql": {
+        "enabled": true,
+        "type": {
+          "singular": "Author",
+          "plural": "Authors"
+        }
+      },
+      "rest": {
+        "enabled": true
+      },
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "*"
+            }
+          ]
+        }
+      ],
+      "relationships": {
+        "books": {
+          "cardinality": "many",
+          "target.entity": "Book",
+          "source.fields": [
+            "id"
+          ],
+          "target.fields": [
+            "id"
+          ],
+          "linking.object": "dbo.books_authors",
+          "linking.source.fields": [
+            "author_id"
+          ],
+          "linking.target.fields": [
+            "book_id"
+          ]
+        }
+      }
+    },
+    "Book": {
+      "source": {
+        "object": "dbo.books",
+        "type": "table"
+      },
+      "graphql": {
+        "enabled": true,
+        "type": {
+          "singular": "Book",
+          "plural": "Books"
+        }
+      },
+      "rest": {
+        "enabled": true
+      },
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "*"
+            }
+          ]
+        }
+      ],
+      "relationships": {
+        "authors": {
+          "cardinality": "many",
+          "target.entity": "Author",
+          "source.fields": [
+            "id"
+          ],
+          "target.fields": [
+            "id"
+          ],
+          "linking.object": "dbo.books_authors",
+          "linking.source.fields": [
+            "book_id"
+          ],
+          "linking.target.fields": [
+            "author_id"
+          ]
+        }
+      }
+    },
+    "BookDetail": {
+      "source": {
+        "object": "dbo.vw_books_details",
+        "type": "view",
+        "key-fields": [
+          "id"
+        ]
+      },
+      "graphql": {
+        "enabled": true,
+        "type": {
+          "singular": "BookDetail",
+          "plural": "BookDetails"
+        }
+      },
+      "rest": {
+        "enabled": true
+      },
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "read"
+            }
+          ]
+        }
+      ]
+    },
+    "GetCowrittenBooksByAuthor": {
+      "source": {
+        "object": "dbo.stp_get_all_cowritten_books_by_author",
+        "type": "stored-procedure",
+        "parameters": {
+          "searchType": "s"
+        }
+      },
+      "graphql": {
+        "enabled": true,
+        "operation": "query",
+        "type": {
+          "singular": "GetCowrittenBooksByAuthor",
+          "plural": "GetCowrittenBooksByAuthors"
+        }
+      },
+      "rest": {
+        "enabled": true,
+        "methods": [
+          "get"
+        ]
+      },
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "execute"
+            }
+          ]
+        }
+      ]
+    },
+    "BookAuthor": {
+      "source": {
+        "object": "dbo.books_authors",
+        "type": "table"
+      },
+      "graphql": {
+        "enabled": true,
+        "type": {
+          "singular": "BookAuthor",
+          "plural": "BookAuthors"
+        }
+      },
+      "rest": {
+        "enabled": true
+      },
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "*"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

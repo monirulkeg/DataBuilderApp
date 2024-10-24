@@ -34,7 +34,7 @@ services:
     depends_on:
       library-db:
         condition: service_healthy
-    command: sqlcmd -S SQL-Library -U sa -P ${SA_PASSWORD} -d master -i docker-entrypoint-initdb.d/library.azure-sql.sql -e -r1
+    command: sqlcmd -S SQL-Library -U sa -P ${SA_PASSWORD} -d master -i docker-entrypoint-initdb.d/PublisherContext.sql -e -r1
 
   library-api:
     image: mcr.microsoft.com/azure-databases/data-api-builder:latest
@@ -51,7 +51,7 @@ services:
       - library-db-setup
     command: ["--ConfigFileName", "/App/configs/dab-config.json"]
     restart: unless-stopped
-
+  
 networks:
   library-network:
     driver: bridge

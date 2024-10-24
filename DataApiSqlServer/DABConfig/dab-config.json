@@ -1,8 +1,11 @@
 {
-  "$schema": "https://github.com/Azure/data-api-builder/releases/download/v0.9.7/dab.draft.schema.json",
+  "$schema": "https://github.com/Azure/data-api-builder/releases/download/v1.2.11/dab.draft.schema.json",
   "data-source": {
     "database-type": "mssql",
-    "connection-string": "@env('CONN_STRING')"
+    "connection-string": "@env('CONN_STRING')",
+    "options": {
+      "set-session-context": false
+    }
   },
   "runtime": {
     "rest": {
@@ -16,25 +19,27 @@
       "allow-introspection": true
     },
     "host": {
-      "cors": null,
+      "cors": {
+        "origins": [],
+        "allow-credentials": false
+      },
       "authentication": {
-        "provider": "Simulator"
+        "provider": "StaticWebApps"
       },
       "mode": "development"
     }
   },
   "entities": {
-    "Author": {
+    "OrganisationalUnit": {
       "source": {
-        "object": "dbo.authors",
-        "type": "table",
-        "key-fields": []
+        "object": "organisation.organisational_unit",
+        "type": "table"
       },
       "graphql": {
         "enabled": true,
         "type": {
-          "singular": "Author",
-          "plural": "Authors"
+          "singular": "OrganisationalUnit",
+          "plural": "OrganisationalUnits"
         }
       },
       "rest": {
@@ -51,35 +56,30 @@
         }
       ],
       "relationships": {
-        "books": {
+        "organisationalAddresses": {
           "cardinality": "many",
-          "target.entity": "Book",
+          "target.entity": "Address",
           "source.fields": [
-            "id"
+            "Id"
           ],
           "target.fields": [
-            "id"
+            "OrganisationalUnitId"
           ],
-          "linking.object": "dbo.books_authors",
-          "linking.source.fields": [
-            "author_id"
-          ],
-          "linking.target.fields": [
-            "book_id"
-          ]
+          "linking.source.fields": [],
+          "linking.target.fields": []
         }
       }
     },
-    "Book": {
+    "Organisation": {
       "source": {
-        "object": "dbo.books",
+        "object": "organisation.organisation",
         "type": "table"
       },
       "graphql": {
         "enabled": true,
         "type": {
-          "singular": "Book",
-          "plural": "Books"
+          "singular": "Organisation",
+          "plural": "Organisations"
         }
       },
       "rest": {
@@ -96,38 +96,30 @@
         }
       ],
       "relationships": {
-        "authors": {
+        "organisationalUnits": {
           "cardinality": "many",
-          "target.entity": "Author",
+          "target.entity": "OrganisationalUnit",
           "source.fields": [
-            "id"
+            "Id"
           ],
           "target.fields": [
-            "id"
+            "OrganisationId"
           ],
-          "linking.object": "dbo.books_authors",
-          "linking.source.fields": [
-            "book_id"
-          ],
-          "linking.target.fields": [
-            "author_id"
-          ]
+          "linking.source.fields": [],
+          "linking.target.fields": []
         }
       }
     },
-    "BookDetail": {
+    "Address": {
       "source": {
-        "object": "dbo.vw_books_details",
-        "type": "view",
-        "key-fields": [
-          "id"
-        ]
+        "object": "organisational_unit.address",
+        "type": "table"
       },
       "graphql": {
         "enabled": true,
         "type": {
-          "singular": "BookDetail",
-          "plural": "BookDetails"
+          "singular": "Address",
+          "plural": "Addresses"
         }
       },
       "rest": {
@@ -138,55 +130,32 @@
           "role": "anonymous",
           "actions": [
             {
-              "action": "read"
+              "action": "*"
             }
           ]
         }
-      ]
+      ],
+      "relationships": {
+        "AddressLocation": {
+          "cardinality": "one",
+          "target.entity": "Location",
+          "source.fields": [],
+          "target.fields": [],
+          "linking.source.fields": [],
+          "linking.target.fields": []
+        }
+      }
     },
-    "GetCowrittenBooksByAuthor": {
+    "Location": {
       "source": {
-        "object": "dbo.stp_get_all_cowritten_books_by_author",
-        "type": "stored-procedure",
-        "parameters": {
-          "searchType": "s"
-        }
-      },
-      "graphql": {
-        "enabled": true,
-        "operation": "query",
-        "type": {
-          "singular": "GetCowrittenBooksByAuthor",
-          "plural": "GetCowrittenBooksByAuthors"
-        }
-      },
-      "rest": {
-        "enabled": true,
-        "methods": [
-          "get"
-        ]
-      },
-      "permissions": [
-        {
-          "role": "anonymous",
-          "actions": [
-            {
-              "action": "execute"
-            }
-          ]
-        }
-      ]
-    },
-    "BookAuthor": {
-      "source": {
-        "object": "dbo.books_authors",
+        "object": "location.location",
         "type": "table"
       },
       "graphql": {
         "enabled": true,
         "type": {
-          "singular": "BookAuthor",
-          "plural": "BookAuthors"
+          "singular": "Location",
+          "plural": "Locations"
         }
       },
       "rest": {
